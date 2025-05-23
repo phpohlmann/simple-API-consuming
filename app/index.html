@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="pt-BR" ng-app="blogApp" class="scroll-smooth">
+  <head>
+    <!-- METATAGS -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- TÍTULO DA PÁGINA -->
+    <title>Meu Blog Moderno</title>
+
+    <!-- LINKS PARA FONTES GOOGLE -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&family=Merriweather:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- LINK PARA CSS CUSTOMIZADO -->
+    <link href="../css/custom-styles.css" rel="stylesheet" />
+    <!-- LINK PARA BOOTSTRAP CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+
+    <!-- TAG DE SCRIPT PARA TAILWIND CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- TAG DE SCRIPT PARA CONFIGURAÇÃO DO TAILWIND CSS -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              poppins: ["Poppins", "sans-serif"],
+              merriweather: ["Merriweather", "serif"],
+            },
+            colors: {
+              "custom-text": "#eaeaea",
+              "custom-background": "#0a0a0a",
+              "custom-accent": "#ffffff", // Equivalent to Tailwind 'white'
+              "custom-border": "#333333",
+              "custom-text-secondary": "#aaa", // For less prominent text
+              "custom-text-tertiary": "#bbb", // For hovered links, card excerpts
+              "custom-text-footer": "#888", // For footer text, card dates
+              "custom-card-bg": "#111111", // Background for cards
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- TAG DE SCRIPT PARA ANGULARJS CDN -->
+    <script
+      type="text/javascript"
+      src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"
+    ></script>
+
+    <!-- TAG DE SCRIPT PARA ANGULARJS: MÓDULO E CONTROLLER DO BLOG -->
+    <script>
+      angular.module("blogApp", []);
+      angular.module("blogApp").controller("Rest", function ($scope, $http) {
+        $scope.loadingPosts = true;
+        $scope.publicacoes = [];
+        $http
+          .get("https://api-fake-blog.onrender.com/postagens/")
+          .success(function (data) {
+            $scope.publicacoes = data;
+            $scope.loadingPosts = false;
+          })
+          .error(function (data, status) {
+            console.error("Error fetching posts:", status, data);
+            $scope.publicacoes = [];
+            $scope.loadingPosts = false;
+            $scope.errorLoadingPosts =
+              "Não foi possível carregar as postagens.";
+          });
+      });
+    </script>
+  </head>
+
+  <body
+    ng-controller="Rest"
+    class="font-merriweather leading-relaxed text-custom-text bg-custom-background antialiased"
+  >
+    <header
+      id="main-header"
+      class="py-6 border-b border-custom-border bg-custom-background sticky top-0 z-50"
+    >
+      <div
+        class="container max-w-[1100px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center md:gap-0 gap-4"
+      >
+        <a
+          href="index.html"
+          class="font-poppins text-[clamp(1.8rem,4vw,2.5rem)] font-black text-custom-accent uppercase no-underline hover:text-custom-text-tertiary focus:text-custom-text-tertiary transition-colors duration-300 ease-in-out"
+          >BLOG.</a
+        >
+        <nav class="flex space-x-3 md:space-x-6 mt-4 md:mt-0"></nav>
+      </div>
+    </header>
+
+    <main>
+      <section
+        id="intro-animation-target"
+        class="text-center bg-custom-background"
+      >
+        <div
+          class="container max-w-[1100px] mx-auto px-4 h-full flex flex-col justify-center items-center"
+        >
+          <h1
+            class="font-poppins font-black text-[clamp(2.5rem,6vw,4.5rem)] text-custom-accent mb-4"
+          >
+            Histórias & Insights
+          </h1>
+          <p
+            class="text-[clamp(1rem,2.5vw,1.3rem)] text-custom-text-secondary max-w-[700px] mx-auto mb-4"
+          >
+            Explorando o mundo através de palavras e pixels.
+          </p>
+        </div>
+      </section>
+
+      <div id="intro-scroll-spacer"></div>
+
+      <div
+        id="page-content-after-intro"
+        class="bg-custom-background relative z-[1]"
+      >
+        <section class="featured-posts-carousel py-12">
+          <div class="container max-w-[1100px] mx-auto px-4">
+            <h2
+              class="text-center mb-6 font-poppins font-bold text-[clamp(1.8rem,4vw,2.8rem)] text-custom-accent"
+            >
+              Destaques
+            </h2>
+            <div
+              id="postsCarousel"
+              class="carousel slide"
+              data-ride="carousel"
+              ng-if="!loadingPosts && publicacoes.length > 0"
+            >
+              <ol class="carousel-indicators">
+                <li
+                  data-target="#postsCarousel"
+                  data-slide-to="{{$index}}"
+                  ng-repeat="post in publicacoes | limitTo:3 track by $index"
+                  ng-class="{active: $first}"
+                ></li>
+              </ol>
+
+              <div class="carousel-inner">
+                <div
+                  class="carousel-item"
+                  ng-repeat="post in publicacoes | limitTo:3 track by $index"
+                  ng-class="{active: $first}"
+                >
+                  <!-- INÍCIO DA ALTERAÇÃO PARA O CARROSSEL -->
+                  <a
+                    ng-href="post.html?id={{$index}}"
+                    class="block no-underline"
+                  >
+                    <img
+                      ng-src="{{post.thumbImage}}"
+                      class="d-block w-100 max-h-[450px] object-cover"
+                      alt="{{post.thumbImageAltText || post.title}}"
+                    />
+                    <div
+                      class="carousel-caption d-none d-md-block bg-black bg-opacity-50 p-3 rounded"
+                    >
+                      <h5 class="text-white font-poppins font-bold">
+                        {{post.title}}
+                      </h5>
+                      <p class="text-gray-200 text-sm">
+                        {{post.description | limitTo:
+                        120}}{{post.description.length > 120 ? '...' : ''}}
+                      </p>
+                    </div>
+                  </a>
+                  <!-- FIM DA ALTERAÇÃO PARA O CARROSSEL -->
+                </div>
+              </div>
+
+              <a
+                class="carousel-control-prev"
+                href="#postsCarousel"
+                role="button"
+                data-slide="prev"
+              >
+                <span
+                  class="carousel-control-prev-icon"
+                  aria-hidden="true"
+                ></span>
+                <span class="sr-only">Previous</span>
+              </a>
+              <a
+                class="carousel-control-next"
+                href="#postsCarousel"
+                role="button"
+                data-slide="next"
+              >
+                <span
+                  class="carousel-control-next-icon"
+                  aria-hidden="true"
+                ></span>
+                <span class="sr-only">Next</span>
+              </a>
+            </div>
+
+            <div
+              ng-if="loadingPosts"
+              class="text-center text-custom-text-secondary py-8"
+            >
+              <p class="mb-0">Carregando destaques...</p>
+            </div>
+            <div
+              ng-if="!loadingPosts && publicacoes.length === 0"
+              class="text-center text-custom-text-secondary py-8"
+            >
+              <p class="mb-0">
+                {{ errorLoadingPosts || 'Nenhuma postagem em destaque
+                encontrada.'}}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div class="container max-w-[1100px] mx-auto px-4 mt-12">
+          <h2
+            class="text-center mb-6 font-poppins font-bold text-[clamp(1.8rem,4vw,2.8rem)] text-custom-accent"
+          >
+            Todas as Postagens
+          </h2>
+          <div
+            ng-if="loadingPosts && publicacoes.length <= 3"
+            class="text-center text-custom-text-secondary py-8"
+          >
+            <p class="mb-0">Carregando postagens...</p>
+          </div>
+          <div
+            ng-if="!loadingPosts && publicacoes.length === 0"
+            class="text-center text-custom-text-secondary py-8"
+          >
+            <p class="mb-0">
+              {{ errorLoadingPosts || 'Nenhuma postagem encontrada.'}}
+            </p>
+          </div>
+          <div
+            ng-if="!loadingPosts && publicacoes.length > 0 && publicacoes.length <=3"
+            class="text-center text-custom-text-secondary py-8"
+          >
+            <p class="mb-0">Não há mais postagens para exibir.</p>
+          </div>
+
+          <!-- LISTA DE POSTAGENS -->
+          <!-- O ng-repeat original estava aqui, no 'div' com 'space-y-8' -->
+          <!-- Vamos manter o ng-repeat no elemento interno para que 'space-y-8' funcione como esperado -->
+          <div
+            class="space-y-8"
+            ng-if="!loadingPosts && publicacoes.length > 3"
+          >
+            <!-- INÍCIO DA ALTERAÇÃO PARA "TODAS AS POSTAGENS" -->
+            <!-- O ng-repeat agora está na tag <a> que envolve o card -->
+            <a
+              ng-href="post.html?id={{$index + 3}}"
+              class="block no-underline text-custom-text"
+              ng-repeat="publicacao in publicacoes.slice(3) track by $index"
+            >
+              <!-- Este é o seu card original, agora dentro da tag <a> -->
+              <div
+                class="relative bg-custom-card-bg rounded-lg overflow-hidden shadow-md flex flex-col md:flex-row items-start md:items-stretch gap-6 transform transition-all duration-300 filter hover:drop-shadow-[0_0_30px_rgba(255,255,255,0.08)] hover:scale-[1.01]"
+              >
+                <img
+                  ng-src="{{publicacao.thumbImage}}"
+                  alt="{{publicacao.thumbImageAltText || publicacao.title}}"
+                  class="w-full md:w-1/3 h-48 md:h-auto object-cover flex-shrink-0"
+                />
+                <div class="p-6 flex-grow flex flex-col">
+                  <h5
+                    class="font-poppins font-bold text-[clamp(1.4rem,3vw,1.8rem)] text-custom-accent mb-3"
+                  >
+                    {{ publicacao.title }}
+                  </h5>
+                  <p
+                    class="text-[0.95rem] text-custom-text-tertiary mb-4 flex-grow"
+                  >
+                    {{ publicacao.description | limitTo: 200 }} {{
+                    publicacao.description.length > 200 ? '...' : '' }}
+                  </p>
+                  <!-- Mantendo a estrutura da sua linha HR, mas agora sem link direto aqui -->
+                  <hr class="mt-auto border-t border-custom-border" />
+                  <!-- Opcional: adicionar um "Ler mais" visual dentro do card se desejar, mas o card todo é um link -->
+                  <!--
+                  <div class="text-right pt-2">
+                      <span class="text-sm text-custom-text-secondary hover:text-custom-accent transition-colors">
+                          Ver Post Completo →
+                      </span>
+                  </div>
+                  -->
+                </div>
+              </div>
+            </a>
+            <!-- FIM DA ALTERAÇÃO PARA "TODAS AS POSTAGENS" -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      class="py-8 text-center border-t border-custom-border text-[0.85rem] text-custom-text-footer mt-16"
+    >
+      <p class="mb-0">
+        © <span id="current-year"></span> Meu Blog Moderno. Todos os direitos
+        reservados.
+      </p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../js/script.js"></script>
+  </body>
+</html>

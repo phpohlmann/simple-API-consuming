@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="pt-BR" ng-app="blogApp" class="scroll-smooth">
+  <head>
+    <!-- METATAGS -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- TÍTULO DA PÁGINA (SERÁ ATUALIZADO PELO ANGULAR) -->
+    <title>{{post.title || 'Carregando Post...'}} - Meu Blog Moderno</title>
+
+    <!-- LINKS PARA FONTES GOOGLE -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&family=Merriweather:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- LINK PARA CSS CUSTOMIZADO (ASSUMINDO QUE ESTÁ NA MESMA RELAÇÃO DE PASTAS) -->
+    <link href="../css/custom-styles.css" rel="stylesheet" />
+    <!-- LINK PARA BOOTSTRAP CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+
+    <!-- TAG DE SCRIPT PARA TAILWIND CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- TAG DE SCRIPT PARA CONFIGURAÇÃO DO TAILWIND CSS -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              poppins: ["Poppins", "sans-serif"],
+              merriweather: ["Merriweather", "serif"],
+            },
+            colors: {
+              "custom-text": "#eaeaea",
+              "custom-background": "#0a0a0a",
+              "custom-accent": "#ffffff",
+              "custom-border": "#333333",
+              "custom-text-secondary": "#aaa",
+              "custom-text-tertiary": "#bbb",
+              "custom-text-footer": "#888",
+              "custom-card-bg": "#111111",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- TAG DE SCRIPT PARA ANGULARJS CDN -->
+    <script
+      type="text/javascript"
+      src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"
+    ></script>
+
+    <!-- TAG DE SCRIPT PARA ANGULARJS: MÓDULO E CONTROLLER DO POST -->
+    <script>
+      angular
+        .module("blogApp", [])
+        .controller("PostController", function ($scope, $http, $window) {
+          // Adicionado $window
+          // Função auxiliar para pegar parâmetros da URL (se você ainda a estiver usando)
+          function getParameterByName(name, url) {
+            if (!url) url = window.location.href; // $window.location.href também funcionaria aqui
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+              results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return "";
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+          }
+
+          // Inicializa o título para "Carregando..."
+          $window.document.title = "Carregando Post... - Meu Blog Moderno";
+
+          $scope.post = null;
+          $scope.loading = true;
+          $scope.error = null;
+
+          var postId = getParameterByName("id");
+          console.log("Post ID from URL (using getParameterByName):", postId);
+
+          if (postId) {
+            var apiUrl =
+              "https://api-fake-blog.onrender.com/postagem/" + postId;
+            console.log("Fetching from API URL:", apiUrl);
+
+            $http
+              .get(apiUrl)
+              .success(function (data, status, headers, config) {
+                console.log("API Success - Status:", status);
+                console.log("API Success - Data:", data);
+                if (typeof data === "object" && data !== null && data.title) {
+                  // Verifica se data.title existe
+                  $scope.post = data;
+                  $scope.loading = false;
+                  // ATUALIZA O TÍTULO DA PÁGINA AQUI
+                  $window.document.title = data.title + " - Meu Blog Moderno";
+                } else {
+                  console.error(
+                    "API Success but data is not a valid object or title is missing:",
+                    data
+                  );
+                  $scope.error =
+                    "Os dados recebidos da postagem não são válidos ou o título está ausente.";
+                  $scope.loading = false;
+                  // Título em caso de erro de dados
+                  $window.document.title =
+                    "Erro ao Carregar Post - Meu Blog Moderno";
+                }
+              })
+              .error(function (data, status, headers, config) {
+                console.error("API Error - Status:", status);
+                console.error("API Error - Data:", data);
+                $scope.error =
+                  "Não foi possível carregar o post (Erro " +
+                  status +
+                  "). Tente novamente mais tarde.";
+                $scope.loading = false;
+                // Título em caso de erro na API
+                $window.document.title = "Erro na Postagem - Meu Blog Moderno";
+              });
+          } else {
+            console.warn(
+              "Post ID not provided in URL (using getParameterByName)."
+            );
+            $scope.error = "ID do post não fornecido.";
+            $scope.loading = false;
+            // Título se não houver ID
+            $window.document.title = "ID Não Fornecido - Meu Blog Moderno";
+          }
+        });
+    </script>
+  </head>
+
+  <body
+    ng-controller="PostController"
+    class="font-merriweather leading-relaxed text-custom-text bg-custom-background antialiased"
+  >
+    <!-- CABEÇALHO (HEADER) - IGUAL AO DA INDEX.HTML -->
+    <header
+      id="main-header"
+      class="py-6 border-b border-custom-border bg-custom-background sticky top-0 z-50"
+    >
+      <div
+        class="container max-w-[1100px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center md:gap-0 gap-4"
+      >
+        <a
+          href="index.html"
+          class="font-poppins text-[clamp(1.8rem,4vw,2.5rem)] font-black text-custom-accent uppercase no-underline hover:text-custom-text-tertiary focus:text-custom-text-tertiary transition-colors duration-300 ease-in-out"
+          >BLOG.</a
+        >
+        <nav class="flex space-x-3 md:space-x-6 mt-4 md:mt-0">
+          <a
+            href="index.html#page-content-after-intro"
+            class="text-custom-text-secondary hover:text-custom-accent no-underline transition-colors"
+            >Todos os Posts</a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL (MAIN) - DETALHES DO POST -->
+    <main class="py-12">
+      <div class="container max-w-[900px] mx-auto px-4">
+        <div ng-if="loading" class="text-center py-10">
+          <p class="text-custom-text-secondary text-xl">
+            Carregando postagem...
+          </p>
+        </div>
+
+        <div
+          ng-if="!loading && error"
+          class="text-center py-10 bg-red-900 bg-opacity-30 p-6 rounded-md"
+        >
+          <p class="text-red-400 text-xl font-semibold">Erro!</p>
+          <p class="text-custom-text-secondary">{{ error }}</p>
+          <a
+            href="index.html"
+            class="inline-block mt-4 px-4 py-2 bg-custom-accent text-custom-background font-semibold rounded hover:bg-opacity-80 no-underline"
+            >Voltar para o Início</a
+          >
+        </div>
+
+        <article ng-if="!loading && !error && post">
+          <h1
+            class="font-poppins font-black text-[clamp(2rem,5vw,3.5rem)] text-custom-accent mb-6 text-center md:text-left"
+          >
+            {{ post.title }}
+          </h1>
+
+          <div
+            class="flex items-center space-x-3 mb-8 text-sm text-custom-text-secondary justify-center md:justify-start"
+          >
+            <img
+              ng-if="post.profileThumbImage"
+              ng-src="{{ post.profileThumbImage.startsWith('/') ? '.' + post.profileThumbImage : post.profileThumbImage }}"
+              alt="{{ post.profileName || 'Autor' }}"
+              class="w-10 h-10 rounded-full object-cover border-2 border-custom-border"
+            />
+            <span
+              ng-if="!post.profileThumbImage"
+              class="w-10 h-10 rounded-full bg-custom-border flex items-center justify-center text-custom-text-tertiary"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                />
+              </svg>
+            </span>
+            <div>
+              <p class="font-semibold text-custom-text-tertiary mb-0">
+                {{ post.profileName || 'Autor Desconhecido' }}
+              </p>
+              <p class="mb-0">{{ post.postDate }}</p>
+            </div>
+          </div>
+
+          <img
+            ng-src="{{ post.thumbImage }}"
+            alt="{{ post.thumbImageAltText || post.title }}"
+            class="w-full h-auto max-h-[500px] object-cover rounded-lg shadow-lg mb-8"
+          />
+
+          <div
+            class="prose prose-invert max-w-none text-custom-text-tertiary text-[1.1rem] leading-relaxed space-y-6"
+          >
+            <p
+              ng-repeat="paragraph in post.description.split('\\n\\n') track by $index"
+              class="mb-4"
+            >
+              {{ paragraph }}
+            </p>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <footer
+      class="py-8 text-center border-t border-custom-border text-[0.85rem] text-custom-text-footer mt-16"
+    >
+      <p class="mb-0">
+        © <span id="current-year"></span> Meu Blog Moderno. Todos os direitos
+        reservados.
+      </p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../js/script.js"></script>
+    <!-- O script de debug duplicado foi removido daqui -->
+  </body>
+</html>
